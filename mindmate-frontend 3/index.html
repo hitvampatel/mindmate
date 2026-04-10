@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MindMate — Your Wellness Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     AUTH SCREEN (shown when not logged in)
+═══════════════════════════════════════════════════════════ -->
+<div id="auth-screen" class="screen active">
+
+  <!-- Animated background -->
+  <div class="auth-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="noise-overlay"></div>
+  </div>
+
+  <div class="auth-container">
+    <!-- Branding -->
+    <div class="auth-brand">
+      <div class="brand-icon">🧠</div>
+      <h1 class="brand-name">MindMate</h1>
+      <p class="brand-tagline">Your pocket companion for student wellness</p>
+    </div>
+
+    <!-- Tab switcher -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+      <div class="tab-indicator"></div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form class="auth-form active" id="form-login" onsubmit="handleLogin(event)">
+      <div class="field-group">
+        <label>Email or Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="text" id="login-identifier" placeholder="you@university.edu" required autocomplete="username"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="login-password" placeholder="Enter your password" required/>
+          <button type="button" class="toggle-pw" onclick="togglePw('login-password', this)">👁</button>
+        </div>
+      </div>
+      <div id="login-error" class="form-error hidden"></div>
+      <button type="submit" class="btn-primary" id="btn-login">
+        <span class="btn-text">Sign In</span>
+        <span class="btn-loader hidden">⏳</span>
+      </button>
+      <p class="form-footer">Don't have an account? <a href="#" onclick="switchTab('signup')">Create one free</a></p>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form class="auth-form" id="form-signup" onsubmit="handleSignup(event)">
+      <div class="field-group">
+        <label>Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="signup-username" placeholder="your_username" required autocomplete="username"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="signup-email" placeholder="you@university.edu" required autocomplete="email"/>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Password <span class="label-hint">(min. 8 characters)</span></label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="signup-password" placeholder="Create a strong password" required/>
+          <button type="button" class="toggle-pw" onclick="togglePw('signup-password', this)">👁</button>
+        </div>
+        <div class="pw-strength" id="pw-strength"></div>
+      </div>
+      <div id="signup-error" class="form-error hidden"></div>
+      <button type="submit" class="btn-primary" id="btn-signup">
+        <span class="btn-text">Create Account</span>
+        <span class="btn-loader hidden">⏳</span>
+      </button>
+      <p class="form-footer">By joining, you agree to our wellness-first, privacy-first approach.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MAIN APP SCREEN (shown when logged in)
+═══════════════════════════════════════════════════════════ -->
+<div id="app-screen" class="screen">
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="sb-icon">🧠</span>
+      <span class="sb-name">MindMate</span>
+    </div>
+
+    <div class="sidebar-user" id="sb-user">
+      <div class="user-avatar" id="sb-avatar">R</div>
+      <div class="user-info">
+        <span class="user-name" id="sb-username">Loading...</span>
+        <span class="user-streak" id="sb-streak">🔥 0 day streak</span>
+      </div>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#" class="nav-link active" data-page="chat" onclick="navigate('chat', this)">
+        <span class="nav-icon">💬</span><span class="nav-label">Chat</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-page="mood" onclick="navigate('mood', this)">
+        <span class="nav-icon">📊</span><span class="nav-label">Mood Check-in</span>
+        <span class="nav-badge hidden" id="mood-badge">!</span>
+      </a></li>
+      <li><a href="#" class="nav-link" data-page="dashboard" onclick="navigate('dashboard', this)">
+        <span class="nav-icon">📈</span><span class="nav-label">Dashboard</span>
+      </a></li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="wellness-score-mini" id="sb-score">
+        <span class="score-label">Wellness Score</span>
+        <div class="score-bar-wrap">
+          <div class="score-bar-fill" id="sb-score-fill" style="width:0%"></div>
+        </div>
+        <span class="score-value" id="sb-score-val">—</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">🚪 Sign Out</button>
+    </div>
+
+    <!-- Mobile toggle -->
+    <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+  </nav>
+  <div class="sidebar-overlay hidden" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- ── MAIN CONTENT ─────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Mobile header -->
+    <header class="mobile-header">
+      <button class="hamburger" onclick="openSidebar()">☰</button>
+      <span class="mobile-logo">🧠 MindMate</span>
+      <div class="mobile-avatar" id="mob-avatar">R</div>
+    </header>
+
+    <!-- ═══════ PAGE: CHAT ══════════════════════════════════ -->
+    <section class="page active" id="page-chat">
+      <div class="chat-layout">
+
+        <!-- Chat header -->
+        <div class="chat-header">
+          <div class="chat-header-info">
+            <div class="ai-avatar">🤖</div>
+            <div>
+              <h2>MindMate AI</h2>
+              <span class="online-badge">● Online — here for you 24/7</span>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <div class="sentiment-live" id="live-sentiment" title="Live sentiment of your message">
+              <span id="live-emoji">😐</span>
+              <span id="live-label">neutral</span>
+            </div>
+            <button class="btn-ghost" onclick="clearChat()" title="Clear history">🗑</button>
+          </div>
+        </div>
+
+        <!-- Messages area -->
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-welcome">
+            <div class="welcome-icon">💙</div>
+            <h3>Hey there, I'm MindMate.</h3>
+            <p>This is a safe, private space just for you. Share how you're feeling — there's no right or wrong answer here.</p>
+            <div class="quick-prompts">
+              <button class="quick-prompt" onclick="sendQuickPrompt(this)">😰 I'm stressed about exams</button>
+              <button class="quick-prompt" onclick="sendQuickPrompt(this)">😴 I haven't been sleeping well</button>
+              <button class="quick-prompt" onclick="sendQuickPrompt(this)">😔 I've been feeling lonely</button>
+              <button class="quick-prompt" onclick="sendQuickPrompt(this)">🙂 I just want to check in</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crisis banner (hidden by default) -->
+        <div class="crisis-banner hidden" id="crisis-banner">
+          <div class="crisis-inner">
+            <span class="crisis-icon">💙</span>
+            <div class="crisis-text">
+              <strong>You're not alone.</strong>
+              <span id="crisis-msg"></span>
+            </div>
+            <button onclick="document.getElementById('crisis-banner').classList.add('hidden')">✕</button>
+          </div>
+          <div class="crisis-resources" id="crisis-resources"></div>
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="typing-indicator hidden" id="typing-indicator">
+          <div class="ai-dot-avatar">🤖</div>
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+        </div>
+
+        <!-- Input area -->
+        <div class="chat-input-area">
+          <div class="wellness-tip-bar hidden" id="wellness-tip-bar">
+            <span id="wellness-tip-text"></span>
+            <button onclick="document.getElementById('wellness-tip-bar').classList.add('hidden')">✕</button>
+          </div>
+          <div class="input-row">
+            <textarea id="chat-input"
+              placeholder="Share what's on your mind..."
+              rows="1"
+              onkeydown="handleChatKey(event)"
+              oninput="handleInputChange(this)"></textarea>
+            <button class="btn-send" id="btn-send" onclick="sendMessage()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+          <p class="input-disclaimer">MindMate provides emotional support — not medical advice. In a crisis, please contact a professional. 💙</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════ PAGE: MOOD CHECK-IN ═════════════════════════ -->
+    <section class="page" id="page-mood">
+      <div class="page-header">
+        <h1>Mood Check-In <span>📊</span></h1>
+        <p>How are you really feeling today? Honest check-ins build the clearest picture of your wellness.</p>
+      </div>
+
+      <div class="mood-grid">
+
+        <!-- Already checked in card -->
+        <div class="mood-checkedin hidden" id="mood-already-in">
+          <div class="checkedin-icon">✅</div>
+          <h3>You've checked in today!</h3>
+          <p id="checkedin-summary">Your mood was logged.</p>
+          <button class="btn-secondary" onclick="showMoodForm()">Update Today's Mood</button>
+        </div>
+
+        <!-- Mood form card -->
+        <div class="mood-form-card" id="mood-form-card">
+          <form onsubmit="handleMoodSubmit(event)">
+
+            <!-- Mood score slider -->
+            <div class="mood-section">
+              <label class="mood-section-title">How do you feel overall? <span id="score-display" class="score-chip">5</span></label>
+              <div class="mood-slider-wrap">
+                <span class="slider-end">😢</span>
+                <input type="range" id="mood-score" min="1" max="10" value="5"
+                  oninput="updateMoodScore(this.value)" class="mood-slider"/>
+                <span class="slider-end">😊</span>
+              </div>
+              <div class="slider-labels">
+                <span>1 — Very Low</span>
+                <span>5 — Okay</span>
+                <span>10 — Excellent</span>
+              </div>
+            </div>
+
+            <!-- Emotion labels -->
+            <div class="mood-section">
+              <label class="mood-section-title">What best describes your emotion? <span class="optional">(optional)</span></label>
+              <div class="emotion-grid" id="emotion-grid">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Note -->
+            <div class="mood-section">
+              <label class="mood-section-title">Any thoughts to capture? <span class="optional">(optional)</span></label>
+              <textarea class="mood-note" id="mood-note" placeholder="What's on your mind today? You can be honest here..." rows="3" maxlength="500"></textarea>
+              <span class="char-count" id="mood-char">0 / 500</span>
+            </div>
+
+            <!-- Energy & Sleep row -->
+            <div class="mood-row-2col">
+              <div class="mood-section">
+                <label class="mood-section-title">Energy level <span class="optional">(1–5)</span></label>
+                <div class="mini-rating" id="energy-rating">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <div class="mood-section">
+                <label class="mood-section-title">Sleep last night <span class="optional">(hrs)</span></label>
+                <input type="number" class="sleep-input" id="sleep-hrs" min="0" max="24" step="0.5" placeholder="e.g. 7"/>
+              </div>
+            </div>
+
+            <div id="mood-error" class="form-error hidden"></div>
+            <div id="mood-success" class="form-success hidden"></div>
+
+            <button type="submit" class="btn-primary wide" id="btn-mood-submit">
+              <span class="btn-text">💾 Save Today's Check-In</span>
+              <span class="btn-loader hidden">⏳ Saving...</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Mood history mini-chart -->
+        <div class="mood-history-card">
+          <h3 class="card-title">📅 Recent Mood History</h3>
+          <div class="mood-mini-chart" id="mood-mini-chart">
+            <p class="empty-state">Submit your first check-in to see trends here.</p>
+          </div>
+          <div class="mood-stats-row" id="mood-stats-row"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════ PAGE: DASHBOARD ═════════════════════════════ -->
+    <section class="page" id="page-dashboard">
+      <div class="page-header">
+        <h1>Your Dashboard <span>📈</span></h1>
+        <p>A clear picture of your emotional wellness journey over time.</p>
+      </div>
+
+      <!-- KPI cards row -->
+      <div class="kpi-row" id="kpi-row">
+        <div class="kpi-card" id="kpi-wellness">
+          <div class="kpi-icon">🏆</div>
+          <div class="kpi-value" id="kpi-wellness-val">—</div>
+          <div class="kpi-label">Wellness Score</div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi-wellness-bar"></div></div>
+        </div>
+        <div class="kpi-card" id="kpi-mood">
+          <div class="kpi-icon">😊</div>
+          <div class="kpi-value" id="kpi-mood-val">—</div>
+          <div class="kpi-label">Avg Mood (7 days)</div>
+        </div>
+        <div class="kpi-card" id="kpi-streak">
+          <div class="kpi-icon">🔥</div>
+          <div class="kpi-value" id="kpi-streak-val">—</div>
+          <div class="kpi-label">Day Streak</div>
+        </div>
+        <div class="kpi-card" id="kpi-chats">
+          <div class="kpi-icon">💬</div>
+          <div class="kpi-value" id="kpi-chats-val">—</div>
+          <div class="kpi-label">Total Conversations</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-row">
+
+        <!-- Mood chart -->
+        <div class="chart-card">
+          <h3 class="card-title">Mood Trend — Last 14 Days</h3>
+          <canvas id="chart-mood" height="180"></canvas>
+          <div class="chart-empty hidden" id="mood-chart-empty">
+            <p>📊 Submit mood check-ins to see your trend here.</p>
+          </div>
+        </div>
+
+        <!-- Sentiment chart -->
+        <div class="chart-card">
+          <h3 class="card-title">Sentiment Trend — Last 14 Days</h3>
+          <canvas id="chart-sentiment" height="180"></canvas>
+          <div class="chart-empty hidden" id="sentiment-chart-empty">
+            <p>💬 Start chatting to see your emotional pattern here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights + Distribution row -->
+      <div class="insights-row">
+
+        <!-- AI Insights -->
+        <div class="insights-card">
+          <h3 class="card-title">✨ Personalised Insights</h3>
+          <div id="insights-list" class="insights-list">
+            <p class="empty-state">Start using MindMate to generate personal insights.</p>
+          </div>
+        </div>
+
+        <!-- Mood distribution -->
+        <div class="insights-card">
+          <h3 class="card-title">🎭 Emotion Distribution</h3>
+          <div id="mood-dist-list" class="dist-list">
+            <p class="empty-state">No mood labels logged yet.</p>
+          </div>
+        </div>
+
+        <!-- Recent messages -->
+        <div class="insights-card full-width">
+          <h3 class="card-title">💬 Recent Conversations</h3>
+          <div id="recent-messages-list" class="recent-msgs">
+            <p class="empty-state">No conversations yet. Start chatting!</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
